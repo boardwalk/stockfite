@@ -43,7 +43,7 @@ def main():
     with open("stockfite.html") as inf:
         templ = string.Template(inf.read())
 
-    begin_date = datetime.date(2017, 1, 1)
+    begin_date = datetime.date(2017, 1, 17)
     end_date = datetime.date(2017, 12, 29)
     repls = {
         "ntdoy_p": json.dumps(fetch("ntdoy", begin_date, end_date, dividends=False)),

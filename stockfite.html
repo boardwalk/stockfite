@@ -30,8 +30,7 @@
           return data;
       }
 
-      var ctx = document.getElementById("chart");
-      var chart = new Chart(ctx, 
+      var chart = new Chart("chart",
         {
           type: 'line',
           data: {
@@ -40,7 +39,7 @@
                 label: 'NTDOY',
                 data: make_price_data(ntdoy_p, ntdoy_d),
                 backgroundColor: "rgba(255, 99, 132, 0.2)",
-                borderColor: "rgba(255,99,132,1)"
+                borderColor: "rgba(255, 99, 132, 1)"
               },
               {
                 label: 'FDS',
@@ -52,6 +51,15 @@
           },
           options: {
             scales: {
+              yAxes: [
+                {
+                  ticks: {
+                    callback: function(value, index, values) {
+                      return "$$" + value;
+                    }
+                  }
+                }
+              ],
               xAxes: [
                 {
                   type: "time",

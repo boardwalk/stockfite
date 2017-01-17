@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>STOCKFITE!</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.bundle.js"></script>
+  </head>
+  <body>
+    <canvas id="chart"></canvas>
+    <script>
+      var ntdoy_p = $ntdoy_p;
+      var ntdoy_d = $ntdoy_d;
+      var fds_p = $fds_p;
+      var fds_d = $fds_d;
+
+      function make_price_data(p, d) {
+          var data = [];
+          var num_shares = 1000 / p[p.length - 1].Open;
+
+          var di = 0;
+          for(var pi = 0; pi < p.length; pi++) {
+            while(di < d.length && d[di].Date <= p[pi].Date) {
+              dividend = num_shares * d[di].Dividends;
+              num_shares += dividend / p[pi].Close;
+              di++;
+            }
+
+            data.push({x: p[pi].Date, y: num_shares * p[pi].Close});
+          }
+
+          return data;
+      }
+
+      var ctx = document.getElementById("chart");
+      var chart = new Chart(ctx, 
+        {
+          type: 'line',
+          data: {
+            datasets: [
+              {
+                label: 'NTDOY',
+                data: make_price_data(ntdoy_p, ntdoy_d),
+                backgroundColor: "rgba(255, 99, 132, 0.2)",
+                borderColor: "rgba(255,99,132,1)"
+              },
+              {
+                label: 'FDS',
+                data: make_price_data(fds_p, fds_d),
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                borderColor: "rgba(54, 162, 235, 1)"
+              }
+            ]
+          },
+          options: {
+            scales: {
+              xAxes: [
+                {
+                  type: "time",
+                  time: {
+                    unit: "day",
+                    displayFormats: {"day": "MMM D"}
+                  }
+                }
+              ]
+            },
+            title: {display: true, text: "Growth of $$1,000"},
+            legend: {position: "bottom"},
+            tooltips: {
+              callbacks: {
+                label: function(tooltipItem, data) {
+                  return "$$" + tooltipItem.yLabel.toFixed(2);
+                }
+              }
+            }
+          }
+        });
+    </script>
+  </body>
+</html>
+

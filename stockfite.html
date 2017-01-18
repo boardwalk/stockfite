@@ -14,17 +14,23 @@
 
       function make_price_data(p, d) {
           var data = [];
-          var num_shares = 1000 / p[0].Open;
+          var shares = 1000 / p[0].Open;
 
           var di = 0;
           for(var pi = 0; pi < p.length; pi++) {
             while(di < d.length && d[di].Date <= p[pi].Date) {
               dividend = num_shares * d[di].Dividends;
-              num_shares += dividend / p[pi].Close;
+              shares += dividend / p[pi].Close;
               di++;
             }
 
-            data.push({x: p[pi].Date, y: num_shares * p[pi].Close});
+            data.push({
+              x: p[pi].Date,
+              y: shares * p[pi].Close,
+              open: p[pi].Open,
+              close: p[pi].Close,
+              shares: shares
+            });
           }
 
           return data;
@@ -75,7 +81,11 @@
             tooltips: {
               callbacks: {
                 label: function(tooltipItem, data) {
-                  return "$$" + tooltipItem.yLabel.toFixed(2);
+                  var obj = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                  return "$$" + tooltipItem.yLabel.toFixed(2) +
+                    " (open " + parseFloat(obj.open).toFixed(2) +
+                    ", close " + parseFloat(obj.close).toFixed(2) +
+                    ", shares " + parseFloat(obj.shares).toFixed(2) + ")";
                 }
               }
             }

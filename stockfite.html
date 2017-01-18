@@ -14,7 +14,7 @@
 
       function make_price_data(p, d) {
           var data = [];
-          var num_shares = 1000 / p[p.length - 1].Open;
+          var num_shares = 1000 / p[0].Open;
 
           var di = 0;
           for(var pi = 0; pi < p.length; pi++) {

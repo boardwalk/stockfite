@@ -2,15 +2,40 @@
 <html>
   <head>
     <title>STOCKFITE!</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.bundle.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <style>
+      #chart {
+        width: 100%;
+        height: 600px;
+      }
+    </style>
   </head>
   <body>
-    <canvas id="chart"></canvas>
+    <div id="chart"></div>
     <script>
+      function convert(obj) {
+        Object.keys(obj).forEach(function(key) {
+          if(key == 'Date') {
+            obj[key] = new Date(Date.parse(obj[key]));
+          } else {
+            obj[key] = parseFloat(obj[key]);
+          }
+        });
+
+        return obj;
+      }
+
       var ntdoy_p = $ntdoy_p;
+      ntdoy_p.forEach(convert);
+
       var ntdoy_d = $ntdoy_d;
+      ntdoy_d.forEach(convert);
+
       var fds_p = $fds_p;
+      fds_p.forEach(convert);
+
       var fds_d = $fds_d;
+      fds_d.forEach(convert);
 
       function formatMoney(x) {
         return x.toLocaleString(x, {"style": "currency", "currency": "usd"});
@@ -40,61 +65,59 @@
           return data;
       }
 
-      var chart = new Chart("chart",
-        {
-          type: 'line',
-          data: {
-            datasets: [
-              {
-                label: 'NTDOY',
-                data: makePriceData(ntdoy_p, ntdoy_d),
-                backgroundColor: "rgba(255, 99, 132, 0.2)",
-                borderColor: "rgba(255, 99, 132, 1)"
-              },
-              {
-                label: 'FDS',
-                data: makePriceData(fds_p, fds_d),
-                backgroundColor: "rgba(54, 162, 235, 0.2)",
-                borderColor: "rgba(54, 162, 235, 1)"
-              }
-            ]
-          },
-          options: {
-            scales: {
-              yAxes: [
-                {
-                  ticks: {
-                    callback: function(value, index, values) {
-                      return formatMoney(value);
-                    }
-                  }
-                }
-              ],
-              xAxes: [
-                {
-                  type: "time",
-                  time: {
-                    unit: "day",
-                    displayFormats: {"day": "M/DD"}
-                  }
-                }
-              ]
-            },
-            title: {display: true, text: "Growth of $$1,000"},
-            legend: {position: "bottom"},
-            tooltips: {
-              callbacks: {
-                label: function(tooltipItem, data) {
-                  var obj = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
-                  return formatMoney(tooltipItem.yLabel) +
-                    " (open " + formatMoney(parseFloat(obj.open)) +
-                    ", close " + formatMoney(parseFloat(obj.close)) +
-                    ", shares " + parseFloat(obj.shares).toFixed(2) + ")";
-                }
-              }
+      var chart = Highcharts.chart("chart", {
+        chart: {
+          type: 'area'
+        },
+        title: {
+          text: 'Growth of $$1,000'
+        },
+        xAxis: {
+          type: 'date',
+          labels: {
+            formatter: function() {
+              var dt = new Date(this.value);
+              return (dt.getMonth() + 1) + "/" + dt.getDate();
             }
           }
-        });
+        },
+        yAxis: {
+          title: {text: null},
+          labels: {
+            formatter: function() {
+              return formatMoney(this.value);
+            }
+          },
+          floor: 900
+        },
+        tooltip: {
+          // TODO Why doesn't this work?
+          xDateFormat: "%Y-%m-%d",
+          pointFormatter: function() {
+            return formatMoney(this.y) +
+              " (open " + formatMoney(parseFloat(this.open)) +
+              ", close " + formatMoney(parseFloat(this.close)) +
+              ", shares " + parseFloat(this.shares).toFixed(2) + ")";
+          }
+        },
+        series: [
+          {
+            name: 'NTDOY',
+            color: 'rgba(255, 99, 132, 1)',
+            fillColor: 'rgba(255, 99, 132, 0.2)',
+            data: makePriceData(ntdoy_p, ntdoy_d)
+          },
+          {
+            name: 'FDS',
+            color: 'rgba(54, 162, 235, 1)',
+            fillColor: 'rgba(54, 162, 235, 0.2)',
+            data: makePriceData(fds_p, fds_d)
+          }
+        ],
+        credits: {
+          enabled: false
+        }
+      });
     </script>
   </body>
 </html>
